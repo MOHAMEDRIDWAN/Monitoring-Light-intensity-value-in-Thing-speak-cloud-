@@ -1,3 +1,5 @@
+# NAME: MOHAMED RIDWAN A
+# REG NO: 212223110030
 # Monitoring-Light-intensity-value-in-Thing-speak-cloud
 # Uploading LDR sensor data in Thing Speak cloud
 
@@ -90,8 +92,87 @@ Prototype and build IoT systems without setting up servers or developing web sof
 
  
 # PROGRAM:
+```
+#include <WiFi.h>
+#include <ThingSpeak.h>
+
+#define ldr_pin 34
+#define led_pin 2
+int ldrValue = 0;
+int lightPercentage= 0;
+
+const int darkValue= 4095;
+const int brightValue=0;
+
+//thingspeal settings
+WiFiClient client;               // fixed: WiFiClient (was WifiClient)
+char ssid[] = "طوفان";
+char password[] = "12345678";
+
+
+unsigned long myChannelField = 3103024; // fixed case to match usage below
+const int LightField = 1;         // renamed to avoid conflict with float Temperature
+const char* myWriteAPIKey = "MEOXO84YOH1J0I9D";
+
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(115200);
+  pinMode(ldr_pin,INPUT);
+  pinMode(led_pin,OUTPUT);
+  ThingSpeak.begin(client);
+  WiFi.mode(WIFI_STA);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  //wifi settings
+  if (WiFi.status() != WL_CONNECTED) {            // fixed: WiFi (not Wifi)
+    Serial.print("Attempting to connect to ssid");
+    Serial.println(ssid);
+
+    while (WiFi.status() != WL_CONNECTED) {
+      WiFi.begin(ssid, password);
+      Serial.print(".");
+      delay(5000);
+    }
+    Serial.println("\nConnected");
+  }
+    ldrValue= analogRead(ldr_pin);
+    lightPercentage = map(ldrValue, darkValue, brightValue, 0, 100);
+
+    lightPercentage = constrain(lightPercentage, 0, 100);
+    Serial.println("Intensity");
+    Serial.println(lightPercentage);
+
+     if (lightPercentage < 50) {
+    digitalWrite(led_pin, HIGH);
+  } 
+  else {
+    digitalWrite(led_pin, LOW);
+  }
+
+  delay(3000);
+
+  // Use the same field identifiers you defined above and your global vars
+  ThingSpeak.setField(LightField, lightPercentage);
+  
+  ThingSpeak.writeFields(myChannelField, myWriteAPIKey); // send fields to ThingSpeak
+  delay(5000);
+
+}
+
+```
 # CIRCUIT DIAGRAM:
+![WhatsApp Image 2025-10-08 at 09 07 44_119a6a9b](https://github.com/user-attachments/assets/5a118962-6ce3-4628-b90f-aa5687b3ed5f)
+
 # OUTPUT:
+SERIAL MONITOR:
+<img width="1850" height="1039" alt="Screenshot 2025-10-08 090337" src="https://github.com/user-attachments/assets/3f44407d-ac2b-4ab2-aa28-665035605cec" />
+
+THINGSPEAK CLOUD:
+<img width="1919" height="1065" alt="Screenshot 2025-10-08 090323" src="https://github.com/user-attachments/assets/98d864b2-5e03-4c58-89ef-df8963232c53" />
+
 # RESULT:
 
 Thus the light intensity values are updated in the Thing speak cloud using ESP32 controller.
